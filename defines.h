@@ -1,3 +1,4 @@
+//Mensajes
 #define MSG_CARGAR_ARCHIVO 			1
 #define MSG_TERMINE_CARGAR_ARCHIVO 	2
 #define MSG_ADD_AND_INC 			3
@@ -8,3 +9,7 @@
 #define MSG_MAXIMUM_PALABRA			8
 #define MSG_MAXIMUM_FIN_HASHMAP		9
 #define MSG_QUIT					10
+
+
+//Ranks
+#define CONSOLA		0
