@@ -6,7 +6,7 @@ CFLAGS+= -Wall -g $(INCL)
 CC=gcc
 MPICC=  $(MPIROOT)/bin/mpic++
 INCL= -I$(MPIROOT)/include
-SRCS= consola.cpp main.cpp nodo.cpp HashMap.cpp
+SRCS= consola.cpp main.cpp nodo.cpp HashMap.cpp base.cpp
 BIN= dist_hashmap
 
 all: dist_hashmap

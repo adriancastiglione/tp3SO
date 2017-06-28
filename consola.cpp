@@ -10,6 +10,8 @@
 #include "HashMap.hpp"
 #include "mpi.h"
 
+#include "base.h"
+
 using namespace std;
 
 #define CMD_LOAD    "load"
@@ -20,31 +22,65 @@ using namespace std;
 #define CMD_SQUIT   "q"
 
 static unsigned int np;
+extern std::ofstream logFile; 
+
+void terminarProtocolo(MPI_Status& status){
+    return; // no hacer nada
+    char buffer[BUFFER_SIZE];
+
+    switch(status.MPI_TAG){
+        case LOAD_ACK:
+            MPI_Send(&buffer, BUFFER_SIZE, MPI_CHAR, status.MPI_SOURCE, LOAD_REL, MPI_COMM_WORLD);
+            break;
+
+    }
+
+}
 
 // Crea un ConcurrentHashMap distribuido
 static void load(list<string> params) {
 
-    char buffer[100]; 
+    char buffer[BUFFER_SIZE]; 
+    MPI_Status status;
     list<string>::iterator it=params.begin();   
-    for( int i = 1 ; i<np ; i++){
-        *buffer = (*it).c_str();
-        MPI_Send(buffer,100,MPI_CHAR,i,MSG_CARGAR_ARCHIVO,MPI_COMM_WORLD);
-        it++;
+    
+    //Enviar a todos los nodos
+    for(unsigned i = 1; i < np; i++){
+        MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, i, LOAD_REQ, MPI_COMM_WORLD);
     }
-    int rank;
-    while(it != end){
-        
-        MPI_Recv(&rank, 1, MPI_INT, MPI_ANY_SOURCE, MSG_TERMINE_CARGAR_ARCHIVO, MPI_COMM_WORLD, status);
-        *buffer = (*it).c_str();
-        MPI_Send(buffer,100,MPI_CHAR,i,MSG_CARGAR_ARCHIVO,MPI_COMM_WORLD);
-        it++;
+
+    while(it != params.end()) {
+
+        MPI_Recv(buffer, 1, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        if(status.MPI_TAG == LOAD_ACK){
+            memset(buffer, 0, BUFFER_SIZE);
+            strcpy(buffer, (*it).c_str());
+            it++;
+            MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, status.MPI_SOURCE, LOAD_DATA, MPI_COMM_WORLD);
+        }
+        else{
+            terminarProtocolo(status);
+        }
+
+    };
+
+    //Enviar a todos los nodos
+    for(unsigned i = 1; i < np; i++){
+        MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, i, LOAD_REL, MPI_COMM_WORLD);
     }
+
+
     cout << "La listá esta procesada" << endl;
 }
 
 // Esta función debe avisar a todos los nodos que deben terminar
 static void quit() {
-    // TODO: Implementar
+
+    char buffer[BUFFER_SIZE];
+
+    for(unsigned i = 1; i < np; i++){
+        MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, i, QUIT, MPI_COMM_WORLD);
+    }
 }
 
 // Esta función calcula el máximo con todos los nodos
@@ -161,6 +197,7 @@ static bool procesar_comandos() {
 }
 
 void consola(unsigned int np_param) {
+    
     np = np_param;
     printf("Comandos disponibles:\n");
     printf("  "CMD_LOAD" <arch_1> <arch_2> ... <arch_n>\n");
