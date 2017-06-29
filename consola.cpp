@@ -24,91 +24,197 @@ using namespace std;
 static unsigned int np;
 extern std::ofstream logFile; 
 
-void terminarProtocolo(MPI_Status& status){
-    return; // no hacer nada
-    char buffer[BUFFER_SIZE];
+void ignorar(MPI_Status status){
 
-    switch(status.MPI_TAG){
-        case LOAD_ACK:
-            MPI_Send(&buffer, BUFFER_SIZE, MPI_CHAR, status.MPI_SOURCE, LOAD_REL, MPI_COMM_WORLD);
-            break;
-
-    }
-
+    //esta función no hace nada. El programa se construyó así
+    //por si se necesita, en el futuro,  "acomodar" algo cuando se ignora un mensaje
 }
 
 // Crea un ConcurrentHashMap distribuido
 static void load(list<string> params) {
 
+    log("protocolo load iniciado");
     char buffer[BUFFER_SIZE]; 
     MPI_Status status;
     list<string>::iterator it=params.begin();   
     
     //Enviar a todos los nodos
+    log("enviando LOAD_REQ a todos los nodos");
     for(unsigned i = 1; i < np; i++){
         MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, i, LOAD_REQ, MPI_COMM_WORLD);
     }
+    log("enviado LOAD_REQ a todos los nodos");
 
     while(it != params.end()) {
 
-        MPI_Recv(buffer, 1, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        MPI_Recv(buffer, BUFFER_SIZE, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
         if(status.MPI_TAG == LOAD_ACK){
+            log("recibido LOAD_ACK");
             memset(buffer, 0, BUFFER_SIZE);
             strcpy(buffer, (*it).c_str());
             it++;
             MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, status.MPI_SOURCE, LOAD_DATA, MPI_COMM_WORLD);
+            log("enviado LOAD_DATA");
         }
         else{
-            terminarProtocolo(status);
+            ignorar(status);
         }
 
     };
 
     //Enviar a todos los nodos
+    log("enviando LOAD_REL a todos los nodos");
     for(unsigned i = 1; i < np; i++){
         MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, i, LOAD_REL, MPI_COMM_WORLD);
     }
+    log("enviado LOAD_REL a todos los nodos");
 
-
+    log("protocolo load terminado");
     cout << "La listá esta procesada" << endl;
 }
 
 // Esta función debe avisar a todos los nodos que deben terminar
 static void quit() {
 
+    log("protocolo quit iniciado");
     char buffer[BUFFER_SIZE];
 
+    log("enviando QUIT a todos los nodos");
     for(unsigned i = 1; i < np; i++){
         MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, i, QUIT, MPI_COMM_WORLD);
     }
+    log("enviado QUIT a todos los nodos. Saliendo...");
+    logFile.close();
 }
 
 // Esta función calcula el máximo con todos los nodos
 static void maximum() {
+
+    log("protocolo maximum iniciado");
     pair<string, unsigned int> result;
 
-    // TODO: Implementar
     string str("a");
     result = make_pair(str,10);
 
+    char buffer[BUFFER_SIZE];
+    MPI_Status status;
+
+    memset(buffer, 0, BUFFER_SIZE);
+    HashMap hp;
+
+    log("enviando MAXIMUM_REQ a todos los nodos");
+    for(unsigned i = 1; i < np; i++){
+        MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, i, MAXIMUM_REQ, MPI_COMM_WORLD);
+    }
+    log("enviado MEMBER_REQ a todos los nodos");
+
+
+    unsigned nodosQueFinalizaron = 0;
+    while(nodosQueFinalizaron != (np -1)){
+        MPI_Recv(buffer, BUFFER_SIZE, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        switch(status.MPI_TAG){
+            case MAXIMUM_DATA:{
+                log("recibido MAXIMUM_DATA");
+                string key(buffer);
+                hp.addAndInc(key);
+                break;
+            }
+
+            case MAXIMUM_END:{
+                log("recibido MAXIMUM_END");
+                nodosQueFinalizaron++;
+                break;
+            }
+
+            default:
+                ignorar(status);
+        }
+
+    }
+    log("recibido MAXIMUM_END de todos los nodos");
+
+    result = hp.maximum();
+    log("protocolo maximum terminado");
     cout << "El máximo es <" << result.first <<"," << result.second << ">" << endl;
 }
 
 // Esta función busca la existencia de *key* en algún nodo
-static void member(string key) {
+static void member(const string& key) {
+    
+    log("protocolo member iniciado");
+    char buffer[BUFFER_SIZE];
+    MPI_Status status;
+
+    memset(buffer, 0, BUFFER_SIZE);
+    strcpy(buffer, key.c_str());
+
     bool esta = false;
+    log("enviando MEMBER_REQ a todos los nodos");
+    for(unsigned i = 1; i < np; i++){
+        MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, i, MEMBER_REQ, MPI_COMM_WORLD);
+    }
+    log("enviado MEMBER_REQ a todos los nodos");
 
-    // TODO: Implementar
+    unsigned recibidos = 0;
 
+    while(!esta && recibidos < (np -1)){
+        MPI_Recv(buffer, BUFFER_SIZE, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        if(status.MPI_TAG == MEMBER_DATA){
+            log("recibido MEMBER_DATA");
+            esta = (buffer[0] == 1);
+            recibidos++;
+        }
+        else{
+            ignorar(status);
+        }
+    }
+
+    log("protocolo member terminado");
     cout << "El string <" << key << (esta ? ">" : "> no") << " está" << endl;
 }
 
 
 // Esta función suma uno a *key* en algún nodo
-static void addAndInc(string key) {
+static void addAndInc(const string& key) {
 
-    // TODO: Implementar
+    log("protocolo addAndInc iniciado");
+    char buffer[BUFFER_SIZE];
+    MPI_Status status;
 
+    memset(buffer, 0, BUFFER_SIZE);
+    strcpy(buffer, key.c_str());
+
+    log("enviando ADD_REQ a todos los nodos");
+    for(unsigned i = 1; i < np; i++){
+        MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, i, ADD_REQ, MPI_COMM_WORLD);
+    }
+    log("enviado ADD_REQ a todos los nodos");
+
+    bool agregado = false;
+    unsigned rankQueProcesa = CONSOLA;
+
+    while(!agregado){
+        MPI_Recv(buffer, BUFFER_SIZE, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        switch(status.MPI_TAG){
+            case ADD_ACK:
+                log("recibido ADD_ACK");
+                agregado = true;
+                rankQueProcesa = status.MPI_SOURCE;
+                MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, status.MPI_SOURCE, ADD_COMMIT, MPI_COMM_WORLD);
+                log("enviado ADD_COMMIT");
+                break;
+            default:
+                ignorar(status);
+        }
+    }
+
+    log("enviando ADD_ROLLBACK a los nodos restantes");
+    for(unsigned i = 1; i < np; i++)
+        if(i != rankQueProcesa)
+            MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, status.MPI_SOURCE, ADD_ROLLBACK, MPI_COMM_WORLD);
+    log("enviado ADD_ROLLBACK a todos los nodos restantes");
+
+    log("protocolo addAndInc terminado");
     cout << "Agregado: " << key << endl;
 }
 
@@ -198,6 +304,10 @@ static bool procesar_comandos() {
 
 void consola(unsigned int np_param) {
     
+    //inicializar log
+    logFile.open("consola.log", std::fstream::out);
+
+
     np = np_param;
     printf("Comandos disponibles:\n");
     printf("  "CMD_LOAD" <arch_1> <arch_2> ... <arch_n>\n");

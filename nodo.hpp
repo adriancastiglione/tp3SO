@@ -6,6 +6,8 @@
 
 #include "mpi.h"
 #include "base.h"
+#include <iostream>
+#include <string>
 
 /* Función que maneja un nodo.
  * Recibe el rank del nodo.
@@ -18,6 +20,8 @@ void trabajarArduamente();
 
 /* Protocolos */
 void load(MPI_Status);
-
+void member(MPI_Status, const std::string&);
+void addAndInc(MPI_Status, const std::string&);
+void maximum(MPI_Status);
 
 #endif  /* _NODO_H */
