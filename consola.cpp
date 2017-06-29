@@ -31,7 +31,7 @@ void ignorar(MPI_Status status){
 }
 
 // Crea un ConcurrentHashMap distribuido
-static void load(list<string> params) {
+static void load(list<string>& params) {
 
     log("protocolo load iniciado");
     char buffer[BUFFER_SIZE]; 
@@ -39,6 +39,7 @@ static void load(list<string> params) {
     list<string>::iterator it=params.begin();   
     
     //Enviar a todos los nodos
+    uint64_t check = set_new_check_data(buffer);
     log("enviando LOAD_REQ a todos los nodos");
     for(unsigned i = 1; i < np; i++){
         MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, i, LOAD_REQ, MPI_COMM_WORLD);
@@ -48,7 +49,7 @@ static void load(list<string> params) {
     while(it != params.end()) {
 
         MPI_Recv(buffer, BUFFER_SIZE, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-        if(status.MPI_TAG == LOAD_ACK){
+        if(status.MPI_TAG == LOAD_ACK && coincide_check_data(buffer, check)){
             log("recibido LOAD_ACK");
             memset(buffer, 0, BUFFER_SIZE);
             strcpy(buffer, (*it).c_str());
@@ -63,6 +64,7 @@ static void load(list<string> params) {
     };
 
     //Enviar a todos los nodos
+    set_check_data(buffer, check);
     log("enviando LOAD_REL a todos los nodos");
     for(unsigned i = 1; i < np; i++){
         MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, i, LOAD_REL, MPI_COMM_WORLD);
@@ -102,16 +104,21 @@ static void maximum() {
     memset(buffer, 0, BUFFER_SIZE);
     HashMap hp;
 
+    uint64_t check = set_new_check_data(buffer);
     log("enviando MAXIMUM_REQ a todos los nodos");
     for(unsigned i = 1; i < np; i++){
         MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, i, MAXIMUM_REQ, MPI_COMM_WORLD);
     }
-    log("enviado MEMBER_REQ a todos los nodos");
+    log("enviado MAXIMUM_REQ a todos los nodos");
 
 
     unsigned nodosQueFinalizaron = 0;
     while(nodosQueFinalizaron != (np -1)){
         MPI_Recv(buffer, BUFFER_SIZE, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        if(!coincide_check_data(buffer, check)){
+            ignorar(status);
+            continue;
+        }
         switch(status.MPI_TAG){
             case MAXIMUM_DATA:{
                 log("recibido MAXIMUM_DATA");
@@ -147,6 +154,7 @@ static void member(const string& key) {
 
     memset(buffer, 0, BUFFER_SIZE);
     strcpy(buffer, key.c_str());
+    uint64_t check = set_new_check_data(buffer);
 
     bool esta = false;
     log("enviando MEMBER_REQ a todos los nodos");
@@ -159,7 +167,7 @@ static void member(const string& key) {
 
     while(!esta && recibidos < (np -1)){
         MPI_Recv(buffer, BUFFER_SIZE, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-        if(status.MPI_TAG == MEMBER_DATA){
+        if(status.MPI_TAG == MEMBER_DATA && coincide_check_data(buffer, check)){
             log("recibido MEMBER_DATA");
             esta = (buffer[0] == 1);
             recibidos++;
@@ -184,6 +192,7 @@ static void addAndInc(const string& key) {
     memset(buffer, 0, BUFFER_SIZE);
     strcpy(buffer, key.c_str());
 
+    uint64_t check = set_new_check_data(buffer);
     log("enviando ADD_REQ a todos los nodos");
     for(unsigned i = 1; i < np; i++){
         MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, i, ADD_REQ, MPI_COMM_WORLD);
@@ -195,11 +204,13 @@ static void addAndInc(const string& key) {
 
     while(!agregado){
         MPI_Recv(buffer, BUFFER_SIZE, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        if(!coincide_check_data(buffer, check)) continue;
         switch(status.MPI_TAG){
             case ADD_ACK:
                 log("recibido ADD_ACK");
                 agregado = true;
                 rankQueProcesa = status.MPI_SOURCE;
+                set_check_data(buffer, check);
                 MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, status.MPI_SOURCE, ADD_COMMIT, MPI_COMM_WORLD);
                 log("enviado ADD_COMMIT");
                 break;
@@ -209,6 +220,7 @@ static void addAndInc(const string& key) {
     }
 
     log("enviando ADD_ROLLBACK a los nodos restantes");
+    set_check_data(buffer, check);
     for(unsigned i = 1; i < np; i++)
         if(i != rankQueProcesa)
             MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, status.MPI_SOURCE, ADD_ROLLBACK, MPI_COMM_WORLD);
@@ -306,7 +318,6 @@ void consola(unsigned int np_param) {
     
     //inicializar log
     logFile.open("consola.log", std::fstream::out);
-
 
     np = np_param;
     printf("Comandos disponibles:\n");

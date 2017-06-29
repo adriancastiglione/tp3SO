@@ -31,30 +31,31 @@ void nodo(unsigned int rank) {
 	bool continuar = true;
     while (continuar) {
         MPI_Recv(buffer, BUFFER_SIZE, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        uint64_t* check = (uint64_t*) &buffer[CHECK_DATA]; 
         switch(status.MPI_TAG){
         	case LOAD_REQ:{	
         		log("recibido LOAD_REQ. Iniciando protocolo load.");
-        		load(status);
+        		load(*check, status);
         		break;
         	}
 
         	case MEMBER_REQ:{
         		log("recibido MEMBER_REQ. Iniciando protocolo member.");
         		string strKey(buffer);
-        		member(status, strKey);
+        		member(*check, status, strKey);
         		break;
         	}
 
         	case ADD_REQ:{
         		log("recibido ADD_REQ. Iniciando protocolo addAndInc.");
         		string strKey(buffer);
-        		addAndInc(status, strKey);
+        		addAndInc(*check, status, strKey);
         		break;
         	}
 
         	case MAXIMUM_REQ:{
         		log("recibido MAXIMUM_REQ. Iniciando protocolo maximum.");
-        		maximum(status);
+        		maximum(*check, status);
         		break;
         	}
 
@@ -72,15 +73,16 @@ void nodo(unsigned int rank) {
 }
 
 
-void load(MPI_Status status){
+void load(uint64_t check, MPI_Status status){
 
 	char buffer[BUFFER_SIZE];
 
 	//si llegas hasta aca es porque recibiste LOAD_REQ
 	while(true){
+		set_check_data(buffer, check);
 		trabajarArduamente();
-		log("enviando LOAD_ACK");
 	    MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, CONSOLA, LOAD_ACK, MPI_COMM_WORLD);
+		log("enviado LOAD_ACK");
 		MPI_Recv(buffer, BUFFER_SIZE, MPI_CHAR, CONSOLA, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
 		switch(status.MPI_TAG){
@@ -103,12 +105,13 @@ void load(MPI_Status status){
 	}
 }
 
-void member(MPI_Status status, const string& key){
+void member(uint64_t check, MPI_Status status, const string& key){
 
 	char buffer[BUFFER_SIZE];
 	memset(buffer, 0, BUFFER_SIZE);
 
 	buffer[0] = hashMap.member(key);
+	set_check_data(buffer, check);
 
 	trabajarArduamente();
 	MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, CONSOLA, MEMBER_DATA, MPI_COMM_WORLD);
@@ -116,15 +119,18 @@ void member(MPI_Status status, const string& key){
 	log("protocolo de member terminado");
 }
 
-void addAndInc(MPI_Status status, const string& key){
+void addAndInc(uint64_t check, MPI_Status status, const string& key){
 
 	char buffer[BUFFER_SIZE];
 	memset(buffer, 0, BUFFER_SIZE);
 
+	set_check_data(buffer, check);
 	trabajarArduamente();
 	MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, CONSOLA, ADD_ACK, MPI_COMM_WORLD);
 	log("enviado ADD_ACK");
-	MPI_Recv(buffer, BUFFER_SIZE, MPI_CHAR, CONSOLA, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+	do{
+		MPI_Recv(buffer, BUFFER_SIZE, MPI_CHAR, CONSOLA, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+	}while(!coincide_check_data(buffer, check));
 
 	switch(status.MPI_TAG){
 
@@ -138,13 +144,16 @@ void addAndInc(MPI_Status status, const string& key){
 			break;
 		}
 		default:
-			log("recibido mensaje inválido (protocolo actual: addAndInc)");
+			stringstream cvt;
+			cvt << status.MPI_TAG;
+			log(string("recibido mensaje inválido (protocolo actual: addAndInc) msg: ") + cvt.str());
+			break;
 	}
 
 	log("protocolo addAndInc terminado");
 }
 
-void maximum(MPI_Status status){
+void maximum(uint64_t check, MPI_Status status){
 
 	char buffer[BUFFER_SIZE];
 	memset(buffer, 0, BUFFER_SIZE);
@@ -154,10 +163,12 @@ void maximum(MPI_Status status){
 	trabajarArduamente();
 	while(it != hashMap.end()){
 		strcpy(buffer, (*it).c_str());
+		set_check_data(buffer, check);
 		MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, CONSOLA, MAXIMUM_DATA, MPI_COMM_WORLD);
 		log("enviado MAXIMUM_DATA");
 		it++;
 	}
+	set_check_data(buffer, check);
 	MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, CONSOLA, MAXIMUM_END, MPI_COMM_WORLD);
 	log("enviado MAXIMUM_END");
 	log("protocolo maximum terminado");

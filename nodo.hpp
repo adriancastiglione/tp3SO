@@ -8,6 +8,7 @@
 #include "base.h"
 #include <iostream>
 #include <string>
+#include <stdint.h>
 
 /* Función que maneja un nodo.
  * Recibe el rank del nodo.
@@ -19,9 +20,9 @@ void nodo(unsigned int rank);
 void trabajarArduamente();
 
 /* Protocolos */
-void load(MPI_Status);
-void member(MPI_Status, const std::string&);
-void addAndInc(MPI_Status, const std::string&);
-void maximum(MPI_Status);
+void load(uint64_t, MPI_Status);
+void member(uint64_t, MPI_Status, const std::string&);
+void addAndInc(uint64_t, MPI_Status, const std::string&);
+void maximum(uint64_t, MPI_Status);
 
 #endif  /* _NODO_H */

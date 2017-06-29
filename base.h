@@ -34,8 +34,9 @@
 
 
 //otros
+#include <stdint.h>
 #define BUFFER_SIZE 1024
-
+#define CHECK_DATA	BUFFER_SIZE - sizeof(uint64_t)
 
 //logs
 #include <ctime>
@@ -43,5 +44,12 @@
 #include <iostream>
 extern std::ofstream logFile;
 void log(const std::string&);
+
+//checking
+#include <stdint.h>
+extern uint64_t np_count;
+bool coincide_check_data(const char*, uint64_t);
+void set_check_data(char*, uint64_t);
+uint64_t set_new_check_data(char*);
 
 #endif

@@ -16,5 +16,6 @@ $(BIN): $(SRCS)
 
 clean:
 	rm -f $(BIN)
+	rm -f *.log
 
 new: clean all
