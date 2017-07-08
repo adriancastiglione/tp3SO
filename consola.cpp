@@ -18,6 +18,7 @@ using namespace std;
 #define CMD_ADD     "addAndInc"
 #define CMD_MEMBER  "member"
 #define CMD_MAXIMUM "maximum"
+#define CMD_IMPRIMIR "imprimir"
 #define CMD_QUIT    "quit"
 #define CMD_SQUIT   "q"
 
@@ -142,9 +143,67 @@ static void maximum() {
 
 
     result = hp.maximum();
-    hp.printAll();
     log("protocolo maximum terminado");
-    //cout  << result.first <<" " << result.second << endl;
+    cout  << result.first <<" " << result.second << endl;
+}
+static void imprimir(){
+
+    log("protocolo imprimir iniciado");
+    pair<string, unsigned int> result;
+
+    string str("a");
+    result = make_pair(str,10);
+
+    char buffer[BUFFER_SIZE];
+    MPI_Status status;
+
+
+    memset(buffer, 0, BUFFER_SIZE);
+    HashMap hp;
+
+
+    uint64_t check = set_new_check_data(buffer);
+    log("enviando IMPRIMIR_REQ a todos los nodos");
+    for(unsigned i = 1; i < np; i++){
+        MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, i, IMPRIMIR_REQ, MPI_COMM_WORLD);
+    }
+    log("enviado IMPRIMIR_REQ a todos los nodos");
+
+    unsigned nodosQueFinalizaron = 0;
+    while(nodosQueFinalizaron != (np -1)){
+
+
+        MPI_Recv(buffer, BUFFER_SIZE, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        if(!coincide_check_data(buffer, check)){
+            ignorar(status);
+            continue;
+        }
+        switch(status.MPI_TAG){
+            case IMPRIMIR_DATA:{
+                log("recibido IMPRIMIR_DATA");
+                string key(buffer);
+                hp.addAndInc(key);
+                break;
+            }
+
+            case IMPRIMIR_END:{
+                log("recibido IMPRIMIR_END");
+                nodosQueFinalizaron++;
+                break;
+            }
+
+            default:
+                ignorar(status);
+        }
+
+    }
+
+
+    log("recibido IMPRIMIR_END de todos los nodos");
+
+    hp.printAll();
+    log("protocolo imprimir terminado");
+
 }
 
 // Esta función busca la existencia de *key* en algún nodo
@@ -272,6 +331,10 @@ static bool procesar_comandos() {
 
     if (strncmp(first_param, CMD_MAXIMUM, sizeof(CMD_MAXIMUM))==0) {
         maximum();
+        return false;
+    }
+    if (strncmp(first_param, CMD_IMPRIMIR, sizeof(CMD_IMPRIMIR))==0) {
+        imprimir();
         return false;
     }
 

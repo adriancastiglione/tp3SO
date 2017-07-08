@@ -23,9 +23,14 @@
 #define MAXIMUM_REQ		11
 #define MAXIMUM_DATA	12
 #define MAXIMUM_END		13
+//imprimir
+#define IMPRIMIR_REQ	14
+#define IMPRIMIR_DATA	15
+#define IMPRIMIR_END	16
+
 
 //quit
-#define QUIT			14
+#define QUIT			17
 
 //****Fin Mensajes****//
 

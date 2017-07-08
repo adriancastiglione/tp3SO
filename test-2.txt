@@ -1,4 +1,4 @@
 load corpus
-maximum 
+imprimir
 q
 

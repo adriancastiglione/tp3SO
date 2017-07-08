@@ -59,6 +59,11 @@ void nodo(unsigned int rank) {
         		maximum(*check, status);
         		break;
         	}
+        	case IMPRIMIR_REQ:{
+        		log("recibido IMPRIMIR_REQ. Iniciando protocolo imprimir.");
+        		imprimir(*check, status);
+        		break;
+        	}
 
         	case QUIT:{
         		log("recibido QUIT, saliendo");
@@ -173,6 +178,27 @@ void maximum(uint64_t check, MPI_Status status){
 	MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, CONSOLA, MAXIMUM_END, MPI_COMM_WORLD);
 	log("enviado MAXIMUM_END");
 	log("protocolo maximum terminado");
+}
+
+void imprimir(uint64_t check, MPI_Status status){
+
+	char buffer[BUFFER_SIZE];
+	memset(buffer, 0, BUFFER_SIZE);
+
+	HashMap::iterator it = hashMap.begin();
+
+	trabajarArduamente();
+	while(it != hashMap.end()){
+		strcpy(buffer, (*it).c_str());
+		set_check_data(buffer, check);
+		MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, CONSOLA, IMPRIMIR_DATA, MPI_COMM_WORLD);
+		log("enviado IMPRIMIR_DATA");
+		it++;
+	}
+	set_check_data(buffer, check);
+	MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, CONSOLA, IMPRIMIR_END, MPI_COMM_WORLD);
+	log("enviado IMPRIMIR_END");
+	log("protocolo imprimir terminado");
 }
 
 void trabajarArduamente() {
