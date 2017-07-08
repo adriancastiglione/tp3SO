@@ -72,7 +72,7 @@ static void load(list<string>& params) {
     log("enviado LOAD_REL a todos los nodos");
 
     log("protocolo load terminado");
-    cout << "La listá esta procesada" << endl;
+    //cout << "La listá esta procesada" << endl;
 }
 
 // Esta función debe avisar a todos los nodos que deben terminar
@@ -140,9 +140,11 @@ static void maximum() {
     }
     log("recibido MAXIMUM_END de todos los nodos");
 
+
     result = hp.maximum();
+    hp.printAll();
     log("protocolo maximum terminado");
-    cout << "El máximo es <" << result.first <<"," << result.second << ">" << endl;
+    //cout  << result.first <<" " << result.second << endl;
 }
 
 // Esta función busca la existencia de *key* en algún nodo
@@ -178,7 +180,7 @@ static void member(const string& key) {
     }
 
     log("protocolo member terminado");
-    cout << "El string <" << key << (esta ? ">" : "> no") << " está" << endl;
+    //cout << "El string <" << key << (esta ? ">" : "> no") << " está" << endl;
 }
 
 
@@ -227,7 +229,7 @@ static void addAndInc(const string& key) {
     log("enviado ADD_ROLLBACK a todos los nodos restantes");
 
     log("protocolo addAndInc terminado");
-    cout << "Agregado: " << key << endl;
+    //cout << "Agregado: " << key << endl;
 }
 
 
@@ -281,7 +283,7 @@ static bool procesar_comandos() {
             member(s);
         }
         else {
-            printf("Falta un parámetro\n");
+            //printf("Falta un parámetro\n");
         }
         return false;
     }
@@ -292,7 +294,7 @@ static bool procesar_comandos() {
             addAndInc(s);
         }
         else {
-            printf("Falta un parámetro\n");
+            //printf("Falta un parámetro\n");
         }
         return false;
     }
@@ -310,7 +312,7 @@ static bool procesar_comandos() {
         return false;
     }
 
-    printf("Comando no reconocido");
+    //printf("Comando no reconocido");
     return false;
 }
 
@@ -320,16 +322,16 @@ void consola(unsigned int np_param) {
     logFile.open("consola.log", std::fstream::out);
 
     np = np_param;
-    printf("Comandos disponibles:\n");
-    printf("  "CMD_LOAD" <arch_1> <arch_2> ... <arch_n>\n");
-    printf("  "CMD_ADD" <string>\n");
-    printf("  "CMD_MEMBER" <string>\n");
-    printf("  "CMD_MAXIMUM"\n");
-    printf("  "CMD_SQUIT"|"CMD_QUIT"\n");
+    //printf("Comandos disponibles:\n");
+    //printf("  "CMD_LOAD" <arch_1> <arch_2> ... <arch_n>\n");
+    //printf("  "CMD_ADD" <string>\n");
+    //printf("  "CMD_MEMBER" <string>\n");
+    //printf("  "CMD_MAXIMUM"\n");
+    //printf("  "CMD_SQUIT"|"CMD_QUIT"\n");
 
     bool fin = false;
     while (!fin) {
-        printf("> ");
+        //printf("> ");
         fflush(stdout);
         fin = procesar_comandos();
     }

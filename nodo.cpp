@@ -6,6 +6,7 @@
 #include "base.h"
 #include <fstream>
 #include <string>
+#include <string.h>
 #include <sstream>
 
 using namespace std;

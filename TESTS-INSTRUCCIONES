@@ -1,0 +1,13 @@
+Los tests son los mismos que los del tp2. 
+
+Para correr los make test-2-run y make tests-3-run en la funcion maximum de consola.cpp las lineas 145,146 y 147 deben ser :
+(recordar hacer make luego de modificar consola.cpp)
+    hp.printAll();
+    log("protocolo maximum terminado");
+    //cout  << result.first <<" " << result.second << endl;
+
+Para correr el make test-5-run esas lineas deben ser:
+(recordar hacer make luego de modificar consola.cpp)
+    //hp.printAll();
+    log("protocolo maximum terminado");
+    cout  << result.first <<" " << result.second << endl;
