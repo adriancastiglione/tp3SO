@@ -1,4 +1,2 @@
-load corpus
-imprimir
+load corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini
 q
-

@@ -1,8 +1,22 @@
-load corpus-0
-load corpus-1
-load corpus-2
-load corpus-3
-load corpus-4
-maximum 
+load corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini
+member ginebra
+member vestibulo
+member quieran
+member ocurre
+member ruinas
+member instrumentos
+member uno
+member ordeno
+member vi
+member geografico
+member ginebraz
+member vestibuloz
+member quieranz
+member ocurrez
+member ruinasz
+member instrumentosz
+member unoz
+member ordenoz
+member viz
+member geograficoz
 q
-
