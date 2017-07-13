@@ -4,7 +4,7 @@ MPIROOT = /usr
 
 CFLAGS+= -Wall -g $(INCL)
 CC=gcc
-MPICC=  $(MPIROOT)/local/bin/mpic++
+MPICC=  $(MPIROOT)/bin/mpic++
 INCL= -I$(MPIROOT)/include
 SRCS= consola.cpp main.cpp nodo.cpp HashMap.cpp base.cpp
 BIN= dist_hashmap
@@ -30,7 +30,7 @@ test-3-run:#este es el test 2 ( de lo que esta en HO) prueba maximum
 	for i in 1 2 3 4 5; do cat test-3.txt | mpiexec -np $$((i + 1)) ./dist_hashmap | sort | diff -u - corpus-max; done
 	rm -f corpus-max corpus-[0-4]
 test-4-run:#este es el test 4 ( de lo que esta en HO) prueba muchos addAndInc
-	awk -f corpus.awk corpus | sort >corpus-post
+	awk -f corpus.awk corpus50 | sort >corpus-post
 	cat test-4.txt | mpiexec -np 6 ./dist_hashmap | sort | diff -u - corpus-post
 	rm -f corpus-post
 #este es el test 3 ( de lo que esta en HO) probe con archivos de varios tamaños porque se rompia
