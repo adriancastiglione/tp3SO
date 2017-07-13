@@ -239,7 +239,7 @@ static void member(const string& key) {
     }
 
     log("protocolo member terminado");
-    //cout << "El string <" << key << (esta ? ">" : "> no") << " está" << endl;
+    cout << "El string <" << key << (esta ? ">" : "> no") << " está" << endl;
 }
 
 
@@ -284,7 +284,7 @@ static void addAndInc(const string& key) {
     set_check_data(buffer, check);
     for(unsigned i = 1; i < np; i++)
         if(i != rankQueProcesa)
-            MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, status.MPI_SOURCE, ADD_ROLLBACK, MPI_COMM_WORLD);
+            MPI_Send(buffer, BUFFER_SIZE, MPI_CHAR, i, ADD_ROLLBACK, MPI_COMM_WORLD);
     log("enviado ADD_ROLLBACK a todos los nodos restantes");
 
     log("protocolo addAndInc terminado");

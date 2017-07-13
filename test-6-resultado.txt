@@ -1,0 +1,94 @@
+El string <ginebra> está
+El string <vestibulo> está
+El string <quieran> está
+El string <ocurre> está
+El string <ruinas> está
+El string <instrumentos> está
+El string <uno> está
+El string <ordeno> está
+El string <vi> está
+El string <geografico> está
+El string <reportaje> está
+El string <confiesa> está
+El string <facultades> está
+El string <tenido> está
+El string <excitacion> está
+El string <implica> está
+El string <equivale> está
+El string <puerto> está
+El string <cordero> está
+El string <afirmaciones> está
+El string <paralelo> está
+El string <dimension> está
+El string <duro> está
+El string <roman> está
+El string <escritor> está
+El string <institutos> está
+El string <aparte> está
+El string <hablaban> está
+El string <abuela> está
+El string <pertenencia> está
+El string <clinica> está
+El string <paz> está
+El string <aumento> está
+El string <permanente> está
+El string <amplia> está
+El string <aulas> está
+El string <aprovecha> está
+El string <ejemplares> está
+El string <mi> está
+El string <ambicioso> está
+El string <mata> está
+El string <gobernar> está
+El string <precision> está
+El string <tomando> está
+El string <interpreta> está
+El string <cabeza> está
+El string <acontecimiento> está
+El string <ginebraz> no está
+El string <vestibuloz> no está
+El string <quieranz> no está
+El string <ocurrez> no está
+El string <ruinasz> no está
+El string <instrumentosz> no está
+El string <unoz> no está
+El string <ordenoz> no está
+El string <viz> no está
+El string <geograficoz> no está
+El string <reportajez> no está
+El string <confiesaz> no está
+El string <facultadesz> no está
+El string <tenidoz> no está
+El string <excitacionz> no está
+El string <implicaz> no está
+El string <equivalez> no está
+El string <puertoz> no está
+El string <corderoz> no está
+El string <afirmacionesz> no está
+El string <paraleloz> no está
+El string <dimensionz> no está
+El string <duroz> no está
+El string <romanz> no está
+El string <escritorz> no está
+El string <institutosz> no está
+El string <apartez> no está
+El string <hablabanz> no está
+El string <abuelaz> no está
+El string <pertenenciaz> no está
+El string <clinicaz> no está
+El string <pazz> no está
+El string <aumentoz> no está
+El string <permanentez> no está
+El string <ampliaz> no está
+El string <aulasz> no está
+El string <aprovechaz> no está
+El string <ejemplaresz> no está
+El string <miz> no está
+El string <ambiciosoz> no está
+El string <mataz> no está
+El string <gobernarz> no está
+El string <precisionz> no está
+El string <tomandoz> no está
+El string <interpretaz> no está
+El string <cabezaz> no está
+El string <acontecimientoz> no está
