@@ -39,7 +39,10 @@ test-5-run:#este es el que prueba member
 test-6-run:#este es el que prueba member
 	cat test-6.txt | mpiexec -np 6 ./dist_hashmap | diff -u - test-6-resultado.txt
 test-7-run:#este es el que prueba member
-	cat test-7.txt | mpiexec -np 2 ./dist_hashmap | diff -u - test-7-resultado.txt
+	cat test-7.txt | mpiexec -np 6 ./dist_hashmap | diff -u - test-7-resultado.txt
+
+test-9-run:
+	for i in $$(seq 2 10); do echo Corriendo con np=$$i; cat test-9.txt | mpiexec -np $$i ./dist_hashmap; for j in $$(seq 1 $$((i-1)) ); do cat rank$${j}.log | grep corpus>/dev/null; if [ "$$?" != "0" ]; then echo Error: el nodo $$j no ha procesado ningun archivo;	exit 1;	fi; done; done
 clean:
 	rm -f $(BIN)
 	rm -f *.log

@@ -1,4 +1,4 @@
-load corpusmini
+load corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini corpusmini
 member ginebra
 member vestibulo
 member quieran
